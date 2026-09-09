@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PB AI — Jarvis</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .logo { font-size: 70px; }
+    h1 { color: #00e5ff; }
+    .subtitle { color: #b8c4d9; }
+    .card {
+      background: #151d32;
+      border: 1px solid #263653;
+      border-radius: 20px;
+      padding: 25px;
+    }
+    #chat {
+      height: 220px;
+      overflow-y: auto;
+      text-align: left;
+      margin-bottom: 15px;
+    }
+    .message {
+      padding: 12px;
+      border-radius: 10px;
+      margin: 8px 0;
+    }
+    .jarvis {
+      background: #202d46;
+      color: #00e5ff;
+    }
+    .user {
+      background: #263b5c;
+      text-align: right;
+    }
+    .input-box {
+      display: flex;
+      gap: 8px;
+    }
+    input {
+      flex: 1;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #344766;
+      background: #0b1020;
+      color: white;
+      outline: none;
+    }
+    button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #00e5ff;
+      color: #001018;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .start {
+      margin-top: 20px;
+      width: 100%;
+    }
+    footer {
+      margin-top: 25px;
+      color: #71809b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="logo">🤖</div>
+    <h1>PB AI — JARVIS</h1>
+    <p class="subtitle">Your Personal AI Assistant</p>
+
+    <div class="card">
+      <div id="chat">
+        <div class="message jarvis">
+          🤖 Jarvis: Hello! How can I help you?
+        </div>
+      </div>
+
+      <div class="input-box">
+        <input
+          type="text"
+          id="userInput"
+          placeholder="Type your command..."
+          onkeydown="if(event.key === 'Enter') sendMessage()"
+        >
+        <button onclick="sendMessage()">Send</button>
+      </div>
+
+      <button class="start" onclick="startJarvis()">
+        🚀 Start Jarvis
+      </button>
+    </div>
+
+    <footer>© 2026 PB AI • Created by Piyush</footer>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chat = document.getElementById("chat");
+      const text = input.value.trim();
+
+      if (text === "") return;
+
+      chat.innerHTML += `
+        <div class="message user">
+          👤 You: ${text}
+        </div>
+      `;
+
+      input.value = "";
+
+      setTimeout(() => {
+        chat.innerHTML += `
+          <div class="message jarvis">
+            🤖 Jarvis: I received your command!
+          </div>
+        `;
+        chat.scrollTop = chat.scrollHeight;
+      }, 500);
+    }
+
+    function startJarvis() {
+      alert("🚀 PB AI Jarvis Started!");
+    }
+  </script>
+
+</body>
+</html>
