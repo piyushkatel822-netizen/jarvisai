@@ -36,6 +36,9 @@ button{padding:14px 18px;border:0;border-radius:10px;font-weight:bold}
 
 <script>
 const BACKEND="https://jarvisai-449c.onrender.com";
+
+// Wake up Render as soon as the page opens
+fetch(BACKEND+"/", {cache:"no-store"}).catch(()=>{});
 const input=document.getElementById("command");
 const send=document.getElementById("send");
 const chat=document.getElementById("chat");
