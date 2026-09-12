@@ -89,5 +89,66 @@ input.addEventListener("keydown",e=>{
 });
 </script>
 
+
+<div id="jarvis-image-box" style="margin-top:10px;">
+  <input id="jarvisImageInput" type="file" accept="image/*" style="display:none">
+
+  <button type="button" onclick="document.getElementById('jarvisImageInput').click()">
+    📷 Add Image
+  </button>
+
+  <div id="jarvisImagePreview" style="margin-top:10px;"></div>
+</div>
+
+<script>
+document.getElementById("jarvisImageInput").addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const preview = document.getElementById("jarvisImagePreview");
+    const url = URL.createObjectURL(file);
+
+    preview.innerHTML =
+        '<img src="' + url + '" style="max-width:220px;max-height:220px;border-radius:12px;">' +
+        '<br><small>Image selected: ' + file.name + '</small>' +
+        '<br><button type="button" onclick="analyzeJarvisImage()">🔍 Analyze Image</button>';
+});
+
+async function analyzeJarvisImage() {
+    const input = document.getElementById("jarvisImageInput");
+    const file = input.files[0];
+
+    if (!file) {
+        alert("Pehle image select karo.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const backend = "https://jarvisai-449c.onrender.com";
+
+    try {
+        const response = await fetch(backend + "/analyze-image", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        const result =
+            data.answer ||
+            data.response ||
+            data.message ||
+            data.error ||
+            "JARVIS image analysis complete.";
+
+        alert(result);
+    } catch (error) {
+        alert("JARVIS image connection error: " + error);
+    }
+}
+</script>
+
 </body>
 </html>
