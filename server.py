@@ -1,8 +1,10 @@
 import os
 import requests
 from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from dotenv import load_dotenv
+from local_vision import analyze_image
 
 load_dotenv(os.path.expanduser("~/.env"))
 
@@ -345,6 +347,63 @@ def ask():
             "reply": "Server connection error."
         }), 500
 
+
+
+# =========================================================
+#              JARVIS LOCAL IMAGE ANALYSIS
+# =========================================================
+
+@app.route("/ask-image", methods=["POST"])
+def ask_image():
+    try:
+        image = request.files.get("image")
+
+        if image is None:
+            return jsonify({
+                "assistant": "Jarvis",
+                "reply": "Please upload an image."
+            }), 400
+
+        allowed = {
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+        }
+
+        if image.mimetype not in allowed:
+            return jsonify({
+                "assistant": "Jarvis",
+                "reply": "JPG, PNG, WEBP ya GIF image upload karo."
+            }), 400
+
+        os.makedirs("uploads", exist_ok=True)
+
+        filename = secure_filename(image.filename or "jarvis_image.jpg")
+        image_path = os.path.join("uploads", filename)
+
+        image.save(image_path)
+
+        result = analyze_image(image_path)
+
+        # Temporary file remove
+        try:
+            os.remove(image_path)
+        except Exception:
+            pass
+
+        return jsonify({
+            "assistant": "Jarvis",
+            "reply": result,
+            "source": "local_vision"
+        })
+
+    except Exception as e:
+        print("LOCAL IMAGE ERROR:", e)
+        return jsonify({
+            "assistant": "Jarvis",
+            "reply": "JARVIS image ko locally process nahi kar saka."
+        }), 500
 
 # =========================================================
 #                       START
