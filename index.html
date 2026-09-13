@@ -234,7 +234,7 @@ button{
 
 <script>
 
-const BACKEND = "https://jarvisai-449c.onrender.com";
+const BACKEND = "https://jarvisai-449c.onrender.com?v=2";
 
 let selectedImage = null;
 
@@ -423,6 +423,7 @@ async function sendMessage(){
             thinking.remove();
 
             const answer =
+                data.reply ||
                 data.response ||
                 data.answer ||
                 data.message ||
