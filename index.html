@@ -374,42 +374,60 @@ async function sendMessage(){
             formData.append("image",selectedImage);
             formData.append("prompt",text || "Describe this image.");
 
-            const response = await fetch(
-                BACKEND + "/analyze-image",
-                {
-                    method:"POST",
-                    body:formData
-                }
-            );
+            let response;
+
+            try {
+                response = await fetch(
+                    BACKEND + "/analyze-image",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+            } catch (networkError) {
+                thinking.remove();
+                addTextMessage(
+                    "bot",
+                    "❌ JARVIS server se connection nahi ho pa raha.\\n\\n" +
+                    "Network error: " + networkError.message
+                );
+                return;
+            }
 
             const raw = await response.text();
 
             let data = {};
             try {
                 data = JSON.parse(raw);
-            } catch(e) {
-                data = {message: raw};
+            } catch (e) {
+                data = { message: raw };
             }
 
             thinking.remove();
 
-            if(!response.ok){
+            if (!response.ok) {
                 addTextMessage(
                     "bot",
-                    "❌ JARVIS image error: " +
-                    (data.message || data.details || ("HTTP " + response.status))
+                    "❌ JARVIS image error (HTTP " +
+                    response.status + "):\\n" +
+                    (data.message || data.details || raw)
                 );
                 return;
             }
 
-            if(data.image_url){
-
+            if (data.image_url) {
                 addGeneratedImage(
                     data.image_url,
                     data.message || "🖼️ JARVIS created the image."
                 );
+            } else {
+                addTextMessage(
+                    "bot",
+                    data.message || "❌ JARVIS image nahi bana saka."
+                );
+            }
 
-            }else{
+        }else{
 
                 addTextMessage(
                     "bot",
