@@ -415,6 +415,47 @@ function playYouTubeVideo(url){
     );
 }
 
+function showMusicPlayer(url){
+
+    let videoId = "";
+
+    try {
+        const u = new URL(url);
+
+        if(u.hostname.includes("youtu.be")){
+            videoId = u.pathname.substring(1).split("/")[0];
+        }
+
+        if(u.hostname.includes("youtube.com")){
+            videoId = u.searchParams.get("v") || "";
+        }
+
+    } catch(e) {}
+
+    if(!videoId){
+        addTextMessage(
+            "bot",
+            "❌ JARVIS ko YouTube video nahi mila."
+        );
+        return;
+    }
+
+    const player = document.getElementById("jarvisMusicPlayer");
+    const iframe = document.getElementById("youtubePlayer");
+
+    iframe.src =
+        "https://www.youtube.com/embed/" +
+        encodeURIComponent(videoId) +
+        "?autoplay=1";
+
+    player.style.display = "block";
+
+    addTextMessage(
+        "bot",
+        "🎵 JARVIS Music Player mein song play ho raha hai."
+    );
+}
+
 async function sendMessage(){
 
     const text = input.value.trim();
@@ -430,44 +471,6 @@ async function sendMessage(){
     const thinking = addTextMessage("bot", "🤖 JARVIS is thinking...");
 
     try {
-
-        // MUSIC COMMAND
-        const lowerText = text.toLowerCase();
-
-        if (
-            lowerText.startsWith("play ") ||
-            lowerText.includes("music bajao") ||
-            lowerText.includes("song bajao") ||
-            lowerText.includes("gaana bajao")
-        ) {
-
-            let song = text
-                .replace(/^play music/i, "")
-                .replace(/^play/i, "")
-                .replace(/music bajao/i, "")
-                .replace(/song bajao/i, "")
-                .replace(/gaana bajao/i, "")
-                .trim();
-
-            if (!song) {
-                song = "trending music";
-            }
-
-            const youtubeURL =
-                "https://www.youtube.com/results?search_query=" +
-                encodeURIComponent(song);
-
-            thinking.remove();
-
-            addTextMessage(
-                "bot",
-                "🎵 JARVIS: Chrome mein " + song + " search kar raha hoon..."
-            );
-
-            window.open(youtubeURL, "_blank");
-
-            return;
-        }
 
         if(selectedImage){
 
