@@ -136,6 +136,21 @@ button{
     font-size:20px;
 }
 
+#jarvisMusicPlayer{
+    display:none;
+    width:100%;
+    max-width:900px;
+    margin:10px auto;
+    padding:10px 15px;
+}
+
+#jarvisMusicPlayer iframe{
+    width:100%;
+    height:315px;
+    border:0;
+    border-radius:15px;
+}
+
 #plusMenu{
     display:none;
     position:fixed;
@@ -199,6 +214,16 @@ button{
         </div>
     </div>
 
+</div>
+
+<div id="jarvisMusicPlayer">
+    <iframe
+        id="youtubePlayer"
+        src=""
+        title="JARVIS Music Player"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen>
+    </iframe>
 </div>
 
 <div id="imagePreview">
@@ -347,6 +372,47 @@ function addImageMessage(type,src,text){
     chat.scrollTop = chat.scrollHeight;
 
     return message;
+}
+
+function playYouTubeVideo(url){
+
+    let videoId = "";
+
+    try {
+        const u = new URL(url);
+
+        if(u.hostname.includes("youtu.be")){
+            videoId = u.pathname.substring(1).split("/")[0];
+        }else if(u.hostname.includes("youtube.com")){
+            videoId = u.searchParams.get("v") || "";
+        }
+
+    } catch(e) {
+        videoId = "";
+    }
+
+    if(!videoId){
+        addTextMessage(
+            "bot",
+            "❌ JARVIS: Valid YouTube video link nahi mila."
+        );
+        return;
+    }
+
+    const player = document.getElementById("jarvisMusicPlayer");
+    const iframe = document.getElementById("youtubePlayer");
+
+    iframe.src =
+        "https://www.youtube.com/embed/" +
+        encodeURIComponent(videoId) +
+        "?autoplay=1";
+
+    player.style.display = "block";
+
+    addTextMessage(
+        "bot",
+        "🎵 JARVIS Music Player mein song play ho raha hai."
+    );
 }
 
 async function sendMessage(){
