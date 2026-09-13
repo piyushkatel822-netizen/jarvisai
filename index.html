@@ -456,9 +456,76 @@ function showMusicPlayer(url){
     );
 }
 
+
+async function playJarvisMusic(songName){
+
+    if(!songName){
+        addTextMessage("bot", "🎵 Song ka naam batao.");
+        return;
+    }
+
+    addTextMessage(
+        "bot",
+        "🎵 JARVIS \"" + songName + "\" search kar raha hai..."
+    );
+
+    try {
+
+        const response = await fetch(
+            BACKEND + "/youtube-search?q=" +
+            encodeURIComponent(songName)
+        );
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+            addTextMessage(
+                "bot",
+                "❌ " + (data.message || "Song nahi mila.")
+            );
+            return;
+        }
+
+        const player = document.getElementById("youtubePlayer");
+        const box = document.getElementById("jarvisMusicPlayer");
+
+        player.src =
+            "https://www.youtube.com/embed/" +
+            data.video_id +
+            "?autoplay=1&rel=0";
+
+        box.style.display = "block";
+
+        addTextMessage(
+            "bot",
+            "▶️ Playing: " + data.title
+        );
+
+    } catch(error) {
+
+        addTextMessage(
+            "bot",
+            "❌ Music error: " + error.message
+        );
+
+        console.error(error);
+    }
+}
+
 async function sendMessage(){
 
     const text = input.value.trim();
+
+const musicMatch = text.match(
+    /^(?:play|play song|play music|music play|song play)\s+(.+)$/i
+);
+
+if(musicMatch){
+    input.value = "";
+    playJarvisMusic(musicMatch[1].trim());
+    return;
+}
+
 
     if(!text && !selectedImage) return;
 

@@ -246,6 +246,80 @@ def home():
 #                       ASK
 # =========================================================
 
+
+@app.route("/youtube-search", methods=["GET"])
+def youtube_search():
+    import os
+    import requests as http_requests
+
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        return jsonify({"success": False, "message": "Song name nahi mila."}), 400
+
+    api_key = os.getenv("YOUTUBE_API_KEY")
+
+    if not api_key:
+        return jsonify({
+            "success": False,
+            "message": "YOUTUBE_API_KEY Render Environment mein set nahi hai."
+        }), 500
+
+    try:
+        response = http_requests.get(
+            "https://www.googleapis.com/youtube/v3/search",
+            params={
+                "part": "snippet",
+                "q": query,
+                "type": "video",
+                "maxResults": 1,
+                "videoEmbeddable": "true",
+                "regionCode": "IN",
+                "relevanceLanguage": "en",
+                "key": api_key
+            },
+            timeout=20
+        )
+
+        data = response.json()
+
+        if response.status_code != 200:
+            return jsonify({
+                "success": False,
+                "message": "YouTube search failed.",
+                "details": data
+            }), response.status_code
+
+        items = data.get("items", [])
+
+        if not items:
+            return jsonify({
+                "success": False,
+                "message": "Song nahi mila."
+            }), 404
+
+        video_id = items[0].get("id", {}).get("videoId")
+        title = items[0].get("snippet", {}).get("title", "")
+
+        if not video_id:
+            return jsonify({
+                "success": False,
+                "message": "Playable video nahi mila."
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "video_id": video_id,
+            "title": title
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "YouTube search error.",
+            "details": str(e)
+        }), 500
+
 @app.route("/ask", methods=["POST"])
 def ask():
 
