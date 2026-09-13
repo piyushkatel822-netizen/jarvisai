@@ -254,7 +254,7 @@ def ask():
 
     if not command:
         return jsonify({
-            "reply": "Please send a command."
+            "reply": "❌ JARVIS: Please send a command."
         }), 400
 
     # =====================================================
@@ -272,12 +272,37 @@ def ask():
         })
 
     # =====================================================
+    # JARVIS GREETINGS
+    # =====================================================
+
+    greeting_words = {
+        "hi",
+        "hello",
+        "hey",
+        "hii",
+        "hiii",
+        "namaste",
+        "namaskar",
+        "good morning",
+        "good afternoon",
+        "good evening"
+    }
+
+    if command.lower() in greeting_words:
+        return jsonify({
+            "assistant": "Jarvis",
+            "command": command,
+            "reply": "Hello! 👋 Main JARVIS hoon. Batao, main tumhari kya help kar sakta hoon?",
+            "source": "local_jarvis"
+        })
+
+    # =====================================================
     # NORMAL AI QUESTIONS
     # =====================================================
 
     if not API_KEY:
         return jsonify({
-            "reply": "Gemini API key is not configured."
+            "reply": "❌ JARVIS: AI service configuration available nahi hai."
         }), 500
 
     url = (
@@ -314,14 +339,14 @@ def ask():
 
         if response.status_code != 200:
             return jsonify({
-                "reply": "AI service error."
+                "reply": "❌ JARVIS: AI service error."
             }), 502
 
         candidates = result.get("candidates", [])
 
         if not candidates:
             return jsonify({
-                "reply": "AI ne koi response nahi diya."
+                "reply": "❌ JARVIS: Mujhe koi response nahi mila."
             }), 502
 
         reply = (
@@ -339,12 +364,12 @@ def ask():
 
     except requests.Timeout:
         return jsonify({
-            "reply": "AI response mein thoda time lag raha hai. Please try again."
+            "reply": "⏳ JARVIS: Response mein thoda time lag raha hai. Please try again."
         }), 504
 
     except Exception:
         return jsonify({
-            "reply": "Server connection error."
+            "reply": "❌ JARVIS: Server connection error."
         }), 500
 
 
