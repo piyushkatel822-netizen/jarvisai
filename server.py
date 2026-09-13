@@ -515,29 +515,29 @@ def analyze_image():
 
         result = response.json()
 
-        generated_image = None
-        generated_mime = "image/png"
+        # Gemini 3.1 Flash Image returns the generated image
+        # in output_image.data
+        output_image = result.get("output_image")
 
-        # Find generated image inside Gemini response
-        for step in result.get("steps", []):
-            for content in step.get("content", []):
-                if content.get("type") == "image":
-                    generated_image = content.get("data")
-                    generated_mime = content.get(
-                        "mime_type",
-                        "image/png"
-                    )
-                    break
-
-            if generated_image:
-                break
-
-        if not generated_image:
-            print("NO IMAGE IN GEMINI RESPONSE:")
+        if not output_image:
+            print("NO OUTPUT_IMAGE IN GEMINI RESPONSE:")
             print(result)
 
             return jsonify({
-                "message": "❌ JARVIS image return nahi kar saka."
+                "message": "❌ JARVIS image return nahi kar saka.",
+                "details": str(result)[:1500]
+            }), 500
+
+        generated_image = output_image.get("data")
+        generated_mime = output_image.get("mime_type", "image/png")
+
+        if not generated_image:
+            print("OUTPUT_IMAGE DATA MISSING:")
+            print(result)
+
+            return jsonify({
+                "message": "❌ JARVIS image data nahi mila.",
+                "details": str(result)[:1500]
             }), 500
 
         image_url = (
