@@ -382,9 +382,25 @@ async function sendMessage(){
                 }
             );
 
-            const data = await response.json();
+            const raw = await response.text();
+
+            let data = {};
+            try {
+                data = JSON.parse(raw);
+            } catch(e) {
+                data = {message: raw};
+            }
 
             thinking.remove();
+
+            if(!response.ok){
+                addTextMessage(
+                    "bot",
+                    "❌ JARVIS image error: " +
+                    (data.message || data.details || ("HTTP " + response.status))
+                );
+                return;
+            }
 
             if(data.image_url){
 
