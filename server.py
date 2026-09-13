@@ -485,7 +485,7 @@ def analyze_image():
 
             return jsonify({
                 "message": "❌ JARVIS image generation failed.",
-                "details": response.text[:1000]
+                "details": f"API Status: {response.status_code} | {response.text[:1500]}"
             }), 500
 
         result = response.json()
