@@ -365,6 +365,44 @@ async function sendMessage(){
 
     try {
 
+        // MUSIC COMMAND
+        const lowerText = text.toLowerCase();
+
+        if (
+            lowerText.startsWith("play ") ||
+            lowerText.includes("music bajao") ||
+            lowerText.includes("song bajao") ||
+            lowerText.includes("gaana bajao")
+        ) {
+
+            let song = text
+                .replace(/^play music/i, "")
+                .replace(/^play/i, "")
+                .replace(/music bajao/i, "")
+                .replace(/song bajao/i, "")
+                .replace(/gaana bajao/i, "")
+                .trim();
+
+            if (!song) {
+                song = "trending music";
+            }
+
+            const youtubeURL =
+                "https://www.youtube.com/results?search_query=" +
+                encodeURIComponent(song);
+
+            thinking.remove();
+
+            addTextMessage(
+                "bot",
+                "🎵 JARVIS: Chrome mein " + song + " search kar raha hoon..."
+            );
+
+            window.open(youtubeURL, "_blank");
+
+            return;
+        }
+
         if(selectedImage){
 
             addTextMessage(
