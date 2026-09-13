@@ -367,7 +367,9 @@ async function sendMessage(){
 
         if(selectedImage){
 
-            const formData = new FormData();
+            addMessage("⏳ JARVIS image bana raha hai...<br>Please wait, image generation mein thoda time lag sakta hai.", false);
+
+        const formData = new FormData();
 
             formData.append("image",selectedImage);
             formData.append("prompt",text || "Describe this image.");

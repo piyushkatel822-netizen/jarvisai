@@ -476,7 +476,7 @@ def analyze_image():
                 "Content-Type": "application/json"
             },
             json=payload,
-            timeout=180
+            timeout=300
         )
 
         if response.status_code != 200:
