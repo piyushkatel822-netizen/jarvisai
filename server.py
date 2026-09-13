@@ -484,7 +484,7 @@ def analyze_image():
             print(response.text)
 
             return jsonify({
-                "message": "❌ Gemini image generation failed.",
+                "message": "❌ JARVIS image generation failed.",
                 "details": response.text[:1000]
             }), 500
 
@@ -512,7 +512,7 @@ def analyze_image():
             print(result)
 
             return jsonify({
-                "message": "❌ Gemini ne image return nahi ki."
+                "message": "❌ JARVIS image return nahi kar saka."
             }), 500
 
         image_url = (
