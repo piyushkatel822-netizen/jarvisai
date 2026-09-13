@@ -409,6 +409,136 @@ def ask_image():
 #                       START
 # =========================================================
 
+
+
+# ================= GEMINI IMAGE EDITING =================
+
+@app.route("/analyze-image", methods=["POST"])
+def analyze_image():
+    try:
+        import os
+        import base64
+        import requests as http_requests
+
+        api_key = os.getenv("GEMINI_API_KEY")
+
+        if not api_key:
+            return jsonify({
+                "message": "❌ GEMINI_API_KEY Render Environment mein set nahi hai."
+            }), 500
+
+        if "image" not in request.files:
+            return jsonify({
+                "message": "❌ Photo nahi mili."
+            }), 400
+
+        uploaded = request.files["image"]
+        image_bytes = uploaded.read()
+
+        if not image_bytes:
+            return jsonify({
+                "message": "❌ Uploaded photo empty hai."
+            }), 400
+
+        mime_type = uploaded.mimetype or "image/jpeg"
+
+        prompt = request.form.get(
+            "prompt",
+            "Create a high-quality artistic version of this photo."
+        )
+
+        image_data = base64.b64encode(image_bytes).decode("utf-8")
+
+        payload = {
+            "model": "gemini-3.1-flash-image",
+            "input": [
+                {
+                    "type": "image",
+                    "mime_type": mime_type,
+                    "data": image_data
+                },
+                {
+                    "type": "text",
+                    "text": prompt
+                }
+            ],
+            "response_format": {
+                "type": "image",
+                "mime_type": "image/png",
+                "image_size": "1K"
+            }
+        }
+
+        response = http_requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
+            headers={
+                "x-goog-api-key": api_key,
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=180
+        )
+
+        if response.status_code != 200:
+            print("GEMINI ERROR:", response.status_code)
+            print(response.text)
+
+            return jsonify({
+                "message": "❌ Gemini image generation failed.",
+                "details": response.text[:1000]
+            }), 500
+
+        result = response.json()
+
+        generated_image = None
+        generated_mime = "image/png"
+
+        # Find generated image inside Gemini response
+        for step in result.get("steps", []):
+            for content in step.get("content", []):
+                if content.get("type") == "image":
+                    generated_image = content.get("data")
+                    generated_mime = content.get(
+                        "mime_type",
+                        "image/png"
+                    )
+                    break
+
+            if generated_image:
+                break
+
+        if not generated_image:
+            print("NO IMAGE IN GEMINI RESPONSE:")
+            print(result)
+
+            return jsonify({
+                "message": "❌ Gemini ne image return nahi ki."
+            }), 500
+
+        image_url = (
+            "data:"
+            + generated_mime
+            + ";base64,"
+            + generated_image
+        )
+
+        return jsonify({
+            "success": True,
+            "message": "🖼️ JARVIS ne image create kar di!",
+            "image_url": image_url
+        })
+
+    except Exception as e:
+        print("ANALYZE IMAGE ERROR:", repr(e))
+
+        return jsonify({
+            "message": "❌ Image processing error.",
+            "details": str(e)
+        }), 500
+
+# ================= END GEMINI IMAGE EDITING =================
+
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
