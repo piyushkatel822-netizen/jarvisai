@@ -457,6 +457,52 @@ function showMusicPlayer(url){
 }
 
 
+
+function stopJarvisMusic(){
+
+    const player = document.getElementById("youtubePlayer");
+    const box = document.getElementById("jarvisMusicPlayer");
+
+    if(player){
+        player.src = "about:blank";
+    }
+
+    if(box){
+        box.style.display = "none";
+    }
+
+    addTextMessage("bot", "⏹️ Song stopped.");
+}
+
+function stopMusicWhenLeavingJarvis(){
+
+    const player = document.getElementById("youtubePlayer");
+    const box = document.getElementById("jarvisMusicPlayer");
+
+    if(player){
+        player.src = "about:blank";
+    }
+
+    if(box){
+        box.style.display = "none";
+    }
+}
+
+/* JARVIS se bahar jaate hi music stop */
+document.addEventListener("visibilitychange", function(){
+
+    if(document.hidden){
+        stopMusicWhenLeavingJarvis();
+    }
+
+});
+
+/* Page close/navigation par bhi music stop */
+window.addEventListener("pagehide", function(){
+    stopMusicWhenLeavingJarvis();
+});
+
+
 async function playJarvisMusic(songName){
 
     if(!songName){
@@ -515,6 +561,17 @@ async function playJarvisMusic(songName){
 async function sendMessage(){
 
     const text = input.value.trim();
+
+
+const stopMusicMatch = text.match(
+    /^(?:stop song|stop music|song stop|music stop)$/i
+);
+
+if(stopMusicMatch){
+    input.value = "";
+    stopJarvisMusic();
+    return;
+}
 
 const musicMatch = text.match(
     /^(?:play|play song|play music|music play|song play)\s+(.+)$/i
