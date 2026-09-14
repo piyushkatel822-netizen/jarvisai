@@ -247,6 +247,7 @@ def home():
 # =========================================================
 
 
+
 @app.route("/youtube-search", methods=["GET"])
 def youtube_search():
     import os
@@ -255,7 +256,10 @@ def youtube_search():
     query = request.args.get("q", "").strip()
 
     if not query:
-        return jsonify({"success": False, "message": "Song name nahi mila."}), 400
+        return jsonify({
+            "success": False,
+            "message": "Song name nahi mila."
+        }), 400
 
     api_key = os.getenv("YOUTUBE_API_KEY")
 
@@ -272,7 +276,7 @@ def youtube_search():
                 "part": "snippet",
                 "q": query,
                 "type": "video",
-                "maxResults": 1,
+                "maxResults": 10,
                 "videoEmbeddable": "true",
                 "regionCode": "IN",
                 "relevanceLanguage": "en",
@@ -290,27 +294,27 @@ def youtube_search():
                 "details": data
             }), response.status_code
 
-        items = data.get("items", [])
+        videos = []
 
-        if not items:
+        for item in data.get("items", []):
+            video_id = item.get("id", {}).get("videoId")
+            title = item.get("snippet", {}).get("title", "")
+
+            if video_id:
+                videos.append({
+                    "video_id": video_id,
+                    "title": title
+                })
+
+        if not videos:
             return jsonify({
                 "success": False,
-                "message": "Song nahi mila."
-            }), 404
-
-        video_id = items[0].get("id", {}).get("videoId")
-        title = items[0].get("snippet", {}).get("title", "")
-
-        if not video_id:
-            return jsonify({
-                "success": False,
-                "message": "Playable video nahi mila."
+                "message": "Playable song nahi mila."
             }), 404
 
         return jsonify({
             "success": True,
-            "video_id": video_id,
-            "title": title
+            "videos": videos
         })
 
     except Exception as e:

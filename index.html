@@ -198,6 +198,7 @@ button{
     opacity:.6;
 }
 </style>
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 <body>
@@ -216,14 +217,21 @@ button{
 
 </div>
 
-<div id="jarvisMusicPlayer">
-    <iframe
-        id="youtubePlayer"
-        src=""
-        title="JARVIS Music Player"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen>
-    </iframe>
+<div id="jarvisMusicPlayer" style="
+display:none;
+width:100%;
+max-width:900px;
+margin:12px auto;
+padding:10px;
+box-sizing:border-box;
+">
+    <div id="youtubePlayer" style="
+        width:100%;
+        aspect-ratio:16/9;
+        background:#000;
+        border-radius:14px;
+        overflow:hidden;
+    "></div>
 </div>
 
 <div id="imagePreview">
@@ -503,12 +511,88 @@ window.addEventListener("pagehide", function(){
 });
 
 
+
+let jarvisMusicQueue = [];
+let jarvisMusicIndex = 0;
+let jarvisMusicStopped = false;
+let jarvisYTPlayer = null;
+
+function onYouTubeIframeAPIReady(){
+    console.log("YouTube Player API ready");
+}
+
+function createJarvisPlayer(videoId){
+
+    const box = document.getElementById("jarvisMusicPlayer");
+
+    box.style.display = "block";
+
+    if(jarvisYTPlayer){
+
+        jarvisYTPlayer.loadVideoById(videoId);
+        return;
+    }
+
+    jarvisYTPlayer = new YT.Player("youtubePlayer", {
+
+        videoId: videoId,
+
+        playerVars: {
+            autoplay: 1,
+            rel: 0,
+            playsinline: 1
+        },
+
+        events: {
+
+            onStateChange: function(event){
+
+                if(
+                    event.data === YT.PlayerState.ENDED &&
+                    !jarvisMusicStopped
+                ){
+                    playNextJarvisSong();
+                }
+
+            }
+
+        }
+
+    });
+}
+
+function playNextJarvisSong(){
+
+    if(jarvisMusicStopped) return;
+
+    jarvisMusicIndex++;
+
+    if(jarvisMusicIndex >= jarvisMusicQueue.length){
+
+        jarvisMusicIndex = 0;
+    }
+
+    const song = jarvisMusicQueue[jarvisMusicIndex];
+
+    if(!song) return;
+
+    addTextMessage(
+        "bot",
+        "▶️ Next: " + song.title
+    );
+
+    createJarvisPlayer(song.video_id);
+}
+
 async function playJarvisMusic(songName){
 
     if(!songName){
         addTextMessage("bot", "🎵 Song ka naam batao.");
         return;
     }
+
+    jarvisMusicStopped = false;
+    jarvisMusicIndex = 0;
 
     addTextMessage(
         "bot",
@@ -525,26 +609,34 @@ async function playJarvisMusic(songName){
         const data = await response.json();
 
         if(!response.ok || !data.success){
+
             addTextMessage(
                 "bot",
                 "❌ " + (data.message || "Song nahi mila.")
             );
+
             return;
         }
 
-        const player = document.getElementById("youtubePlayer");
-        const box = document.getElementById("jarvisMusicPlayer");
+        jarvisMusicQueue = data.videos || [];
 
-        player.src =
-            "https://www.youtube.com/embed/" +
-            data.video_id +
-            "?autoplay=1&rel=0";
+        if(!jarvisMusicQueue.length){
 
-        box.style.display = "block";
+            addTextMessage(
+                "bot",
+                "❌ Playable song nahi mila."
+            );
+
+            return;
+        }
+
+        const firstSong = jarvisMusicQueue[0];
+
+        createJarvisPlayer(firstSong.video_id);
 
         addTextMessage(
             "bot",
-            "▶️ Playing: " + data.title
+            "▶️ Playing: " + firstSong.title
         );
 
     } catch(error) {
@@ -556,6 +648,32 @@ async function playJarvisMusic(songName){
 
         console.error(error);
     }
+}
+
+function stopJarvisMusic(){
+
+    jarvisMusicStopped = true;
+    jarvisMusicQueue = [];
+    jarvisMusicIndex = 0;
+
+    if(jarvisYTPlayer){
+
+        try{
+            jarvisYTPlayer.stopVideo();
+        }catch(e){}
+
+    }
+
+    const box = document.getElementById("jarvisMusicPlayer");
+
+    if(box){
+        box.style.display = "none";
+    }
+
+    addTextMessage(
+        "bot",
+        "🛑 Song stopped. JARVIS normal mode mein aa gaya."
+    );
 }
 
 async function sendMessage(){
