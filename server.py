@@ -516,6 +516,7 @@ def ask_image():
 
 # ================= GEMINI IMAGE EDITING =================
 
+
 @app.route("/analyze-image", methods=["POST"])
 def analyze_image():
     try:
@@ -527,11 +528,13 @@ def analyze_image():
 
         if not api_key:
             return jsonify({
+                "success": False,
                 "message": "❌ GEMINI_API_KEY Render Environment mein set nahi hai."
             }), 500
 
         if "image" not in request.files:
             return jsonify({
+                "success": False,
                 "message": "❌ Photo nahi mili."
             }), 400
 
@@ -540,6 +543,7 @@ def analyze_image():
 
         if not image_bytes:
             return jsonify({
+                "success": False,
                 "message": "❌ Uploaded photo empty hai."
             }), 400
 
@@ -547,7 +551,7 @@ def analyze_image():
 
         prompt = request.form.get(
             "prompt",
-            "Create a high-quality artistic version of this photo."
+            "Create a high-quality artistic version of this image."
         )
 
         image_data = base64.b64encode(image_bytes).decode("utf-8")
@@ -567,7 +571,6 @@ def analyze_image():
             ],
             "response_format": {
                 "type": "image",
-                "mime_type": "image/png",
                 "image_size": "1K"
             }
         }
@@ -582,68 +585,58 @@ def analyze_image():
             timeout=300
         )
 
+        raw = response.text
+
+        try:
+            result = response.json()
+        except Exception:
+            result = {}
+
         if response.status_code != 200:
-            print("GEMINI ERROR:", response.status_code)
-            print(response.text)
-
             return jsonify({
-                "message": "❌ JARVIS image generation failed.",
-                "details": f"API Status: {response.status_code} | {response.text[:1500]}"
-            }), 500
+                "success": False,
+                "message": "❌ Gemini image generation failed.",
+                "details": result or raw
+            }), response.status_code
 
-        result = response.json()
-
-        # Gemini 3.1 Flash Image returns the generated image
-        # in output_image.data
         output_image = result.get("output_image")
 
         if not output_image:
-            print("NO OUTPUT_IMAGE IN GEMINI RESPONSE:")
-            print(result)
-
             return jsonify({
-                "message": "❌ JARVIS image return nahi kar saka.",
-                "details": str(result)[:1500]
+                "success": False,
+                "message": "❌ Gemini ne image output nahi diya.",
+                "details": result
             }), 500
 
-        generated_image = output_image.get("data")
-        generated_mime = output_image.get("mime_type", "image/png")
+        generated_data = output_image.get("data")
+        generated_mime = output_image.get(
+            "mime_type",
+            "image/png"
+        )
 
-        if not generated_image:
-            print("OUTPUT_IMAGE DATA MISSING:")
-            print(result)
-
+        if not generated_data:
             return jsonify({
-                "message": "❌ JARVIS image data nahi mila.",
-                "details": str(result)[:1500]
+                "success": False,
+                "message": "❌ Generated image data missing hai."
             }), 500
 
         image_url = (
-            "data:"
-            + generated_mime
-            + ";base64,"
-            + generated_image
+            "data:" +
+            generated_mime +
+            ";base64," +
+            generated_data
         )
 
         return jsonify({
             "success": True,
-            "message": "🖼️ JARVIS ne image create kar di!",
+            "message": "🖼️ JARVIS ne image generate kar di!",
             "image_url": image_url
         })
 
     except Exception as e:
-        print("ANALYZE IMAGE ERROR:", repr(e))
-
         return jsonify({
-            "message": "❌ Image processing error.",
+            "success": False,
+            "message": "❌ JARVIS image generation error.",
             "details": str(e)
         }), 500
 
-# ================= END GEMINI IMAGE EDITING =================
-
-
-if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=5000
-    )
