@@ -1,4 +1,5 @@
 import os
+import base64
 import requests
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
@@ -520,123 +521,122 @@ def ask_image():
 @app.route("/analyze-image", methods=["POST"])
 def analyze_image():
     try:
-        import os
-        import base64
-        import requests as http_requests
-
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY") or API_KEY
 
         if not api_key:
             return jsonify({
                 "success": False,
-                "message": "❌ GEMINI_API_KEY Render Environment mein set nahi hai."
+                "message": "GEMINI_API_KEY Render Environment mein set nahi hai."
             }), 500
 
-        if "image" not in request.files:
+        uploaded = request.files.get("image")
+        if uploaded is None:
             return jsonify({
                 "success": False,
-                "message": "❌ Photo nahi mili."
-            }), 400
-
-        uploaded = request.files["image"]
-        image_bytes = uploaded.read()
-
-        if not image_bytes:
-            return jsonify({
-                "success": False,
-                "message": "❌ Uploaded photo empty hai."
+                "message": "Photo nahi mili. Please image upload karo."
             }), 400
 
         mime_type = uploaded.mimetype or "image/jpeg"
+        allowed_types = {"image/jpeg", "image/png", "image/webp"}
 
-        prompt = request.form.get(
-            "prompt",
-            "Create a high-quality artistic version of this image."
-        )
+        if mime_type not in allowed_types:
+            return jsonify({
+                "success": False,
+                "message": "Please JPG, PNG ya WEBP photo upload karo."
+            }), 415
+
+        image_bytes = uploaded.read(15 * 1024 * 1024 + 1)
+        if not image_bytes:
+            return jsonify({
+                "success": False,
+                "message": "Uploaded photo empty hai."
+            }), 400
+
+        if len(image_bytes) > 15 * 1024 * 1024:
+            return jsonify({
+                "success": False,
+                "message": "Photo 15 MB se chhoti honi chahiye."
+            }), 413
+
+        prompt = request.form.get("prompt", "").strip()
+        if not prompt:
+            prompt = "Describe this image and its important details in simple language."
 
         image_data = base64.b64encode(image_bytes).decode("utf-8")
 
         payload = {
-            "model": "gemini-3.1-flash-image",
-            "input": [
-                {
-                    "type": "image",
-                    "mime_type": mime_type,
-                    "data": image_data
-                },
-                {
-                    "type": "text",
-                    "text": prompt
-                }
-            ],
-            "response_format": {
-                "type": "image",
-                "image_size": "1K"
-            }
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": image_data
+                        }
+                    }
+                ]
+            }]
         }
 
-        response = http_requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/interactions",
+        response = requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
             headers={
                 "x-goog-api-key": api_key,
                 "Content-Type": "application/json"
             },
             json=payload,
-            timeout=300
+            timeout=90
         )
-
-        raw = response.text
 
         try:
             result = response.json()
-        except Exception:
+        except ValueError:
             result = {}
 
         if response.status_code != 200:
+            error_info = result.get("error", {}).get("message", response.text[:1000])
             return jsonify({
                 "success": False,
-                "message": "❌ Gemini image generation failed.",
-                "details": result or raw
+                "message": "Gemini image analysis failed: " + str(error_info)
             }), response.status_code
 
-        output_image = result.get("output_image")
+        candidates = result.get("candidates", [])
+        parts = (
+            candidates[0].get("content", {}).get("parts", [])
+            if candidates else []
+        )
+        answer = "\n".join(
+            part.get("text", "")
+            for part in parts
+            if part.get("text")
+        ).strip()
 
-        if not output_image:
+        if not answer:
             return jsonify({
                 "success": False,
-                "message": "❌ Gemini ne image output nahi diya.",
-                "details": result
-            }), 500
-
-        generated_data = output_image.get("data")
-        generated_mime = output_image.get(
-            "mime_type",
-            "image/png"
-        )
-
-        if not generated_data:
-            return jsonify({
-                "success": False,
-                "message": "❌ Generated image data missing hai."
-            }), 500
-
-        image_url = (
-            "data:" +
-            generated_mime +
-            ";base64," +
-            generated_data
-        )
+                "message": "Gemini ne image ke baare mein text answer nahi diya."
+            }), 502
 
         return jsonify({
             "success": True,
-            "message": "🖼️ JARVIS ne image generate kar di!",
-            "image_url": image_url
+            "reply": answer,
+            "source": "gemini_image_understanding"
         })
 
-    except Exception as e:
+    except requests.exceptions.Timeout:
         return jsonify({
             "success": False,
-            "message": "❌ JARVIS image generation error.",
-            "details": str(e)
+            "message": "Gemini server timeout. Thodi der baad try karo."
+        }), 504
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            "success": False,
+            "message": "Gemini connection error: " + str(e)
+        }), 502
+    except Exception as e:
+        print("IMAGE UNDERSTANDING ERROR:", e)
+        return jsonify({
+            "success": False,
+            "message": "JARVIS image analysis error: " + str(e)
         }), 500
 

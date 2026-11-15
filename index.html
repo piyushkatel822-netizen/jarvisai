@@ -1179,24 +1179,15 @@ if(musicMatch){
     try {
 
         if(selectedImage){
-
-            addTextMessage(
-                "bot",
-                "⏳ JARVIS image bana raha hai...\nPlease wait, image generation mein thoda time lag sakta hai."
-            );
-
             const formData = new FormData();
-
             formData.append("image", selectedImage);
             formData.append(
                 "prompt",
-                text || "Make this image into a high-quality anime style."
+                text || "Describe this image and its important details in simple language."
             );
 
             let response;
-
             try {
-
                 response = await fetch(
                     BACKEND + "/analyze-image",
                     {
@@ -1204,24 +1195,17 @@ if(musicMatch){
                         body: formData
                     }
                 );
-
             } catch(networkError) {
-
                 thinking.remove();
-
                 addTextMessage(
                     "bot",
-                    "❌ JARVIS server se connection nahi ho pa raha.\n\n" +
-                    "Network error: " + networkError.message
+                    "❌ JARVIS server connection error: " + networkError.message
                 );
-
                 return;
             }
 
             const raw = await response.text();
-
             let data = {};
-
             try {
                 data = JSON.parse(raw);
             } catch(e) {
@@ -1231,32 +1215,18 @@ if(musicMatch){
             thinking.remove();
 
             if(!response.ok){
-
                 addTextMessage(
                     "bot",
-                    "❌ JARVIS image error (HTTP " +
-                    response.status +
-                    "):\n" +
-                    (data.message || data.details || raw)
+                    "❌ Image analysis error (HTTP " + response.status + "):\n" +
+                    (data.message || raw)
                 );
-
                 return;
             }
 
-            if(data.image_url){
-
-                addGeneratedImage(
-                    data.image_url,
-                    data.message || "🖼️ JARVIS ne anime image create kar di!"
-                );
-
-            }else{
-
-                addTextMessage(
-                    "bot",
-                    data.message || "❌ JARVIS image nahi bana saka."
-                );
-            }
+            const answer = data.reply || data.message ||
+                "JARVIS image ko samajh nahi saka.";
+            addTextMessage("bot", answer);
+            speak(answer);
 
         }else{
 
