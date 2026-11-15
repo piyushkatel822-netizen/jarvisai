@@ -197,6 +197,349 @@ button{
 .typing{
     opacity:.6;
 }
+
+/* JARVIS CHATGPT STYLE UPGRADE V1 */
+
+:root {
+    --bg: #0b0d12;
+    --panel: #131720;
+    --panel2: #1b2230;
+    --border: #293244;
+    --accent: #3985ff;
+    --text: #f4f6fb;
+    --muted: #929bad;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background:
+        radial-gradient(ellipse at 50% -20%, #1a3155 0%, transparent 55%),
+        var(--bg);
+    color: var(--text);
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 17px 14px;
+    background: rgba(15, 19, 28, .92);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+}
+
+header h2 {
+    font-size: 19px;
+    letter-spacing: .4px;
+}
+
+#chat {
+    width: 100%;
+    max-width: 920px;
+    padding: 22px 16px 30px;
+    scroll-behavior: smooth;
+}
+
+.message {
+    margin: 18px 0;
+    animation: jarvisMessageIn .22s ease-out;
+}
+
+@keyframes jarvisMessageIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bubble {
+    max-width: min(82%, 680px);
+    padding: 13px 17px;
+    border: 1px solid var(--border);
+    border-radius: 19px;
+    font-size: 15px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.user .bubble {
+    background: linear-gradient(135deg, #2876ed, #1854bb);
+    border-color: #4789f5;
+    border-bottom-right-radius: 6px;
+}
+
+.bot .bubble {
+    background: rgba(26, 32, 44, .94);
+    border-bottom-left-radius: 6px;
+}
+
+.chat-image {
+    max-width: 100%;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+}
+
+#composer {
+    position: sticky;
+    bottom: 0;
+    z-index: 15;
+    width: 100%;
+    max-width: 920px;
+    padding: 13px 12px max(13px, env(safe-area-inset-bottom));
+    background: rgba(11, 13, 18, .94);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+}
+
+#input {
+    min-width: 0;
+    min-height: 48px;
+    padding: 13px 17px;
+    background: var(--panel);
+    border: 1px solid #344158;
+    border-radius: 25px;
+    color: var(--text);
+    font-size: 15px;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+#input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(57, 133, 255, .13);
+}
+
+button {
+    transition: transform .15s, filter .15s;
+}
+
+button:active {
+    transform: scale(.94);
+}
+
+#plus, #voice {
+    flex-shrink: 0;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+}
+
+#send {
+    flex-shrink: 0;
+    font-weight: 600;
+    background: linear-gradient(135deg, #3985ff, #2860d9);
+    box-shadow: 0 4px 15px rgba(40, 105, 225, .2);
+}
+
+#plusMenu {
+    background: #171e2a;
+    border: 1px solid #344158;
+    box-shadow: 0 12px 35px rgba(0,0,0,.4);
+}
+
+.menuButton {
+    color: var(--text);
+}
+
+.menuButton:hover {
+    background: var(--panel2);
+}
+
+#imagePreview {
+    background: rgba(15, 19, 28, .94);
+    border-radius: 14px;
+}
+
+#jarvisMusicPlayer iframe {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.download {
+    background: #26364f;
+    border: 1px solid #3a5275;
+}
+
+#chat::-webkit-scrollbar {
+    width: 5px;
+}
+
+#chat::-webkit-scrollbar-thumb {
+    background: #354158;
+    border-radius: 10px;
+}
+
+.typing {
+    color: var(--muted);
+}
+
+@media (max-width: 520px) {
+    header h2 {
+        font-size: 17px;
+    }
+
+    #chat {
+        padding: 15px 11px 22px;
+    }
+
+    .bubble {
+        max-width: 90%;
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    #composer {
+        gap: 6px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    #plus, #voice {
+        width: 42px;
+        height: 42px;
+    }
+
+    #send {
+        height: 42px;
+        padding: 0 13px;
+    }
+}
+
+
+/* JARVIS SIDEBAR UPGRADE V1 */
+
+#sidebarToggle {
+    position: absolute;
+    left: 14px;
+    top: 13px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel2);
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+header h2 {
+    margin: 0;
+}
+
+#sidebarOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0,0,0,.58);
+}
+
+#jarvisSidebar {
+    position: fixed;
+    z-index: 41;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(290px, 82vw);
+    padding: 18px 14px;
+    box-sizing: border-box;
+    background: #111722;
+    border-right: 1px solid var(--border);
+    transform: translateX(-105%);
+    transition: transform .25s ease;
+    overflow-y: auto;
+}
+
+#jarvisSidebar.open {
+    transform: translateX(0);
+}
+
+#sidebarOverlay.open {
+    display: block;
+}
+
+#sidebarTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+#sidebarTop strong {
+    font-size: 17px;
+}
+
+#sidebarClose {
+    background: transparent;
+    color: white;
+    border: 0;
+    font-size: 25px;
+}
+
+#newChatButton {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #397ee8;
+    border-radius: 12px;
+    background: #1d4f9b;
+    color: white;
+    font-size: 15px;
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+#historyHeading {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 12px 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.historyItem {
+    width: 100%;
+    padding: 12px;
+    margin: 4px 0;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #e7ebf4;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historyItem:hover {
+    background: #222c3c;
+}
+
+#historyEmpty {
+    padding: 10px 5px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+@media (max-width: 520px) {
+    #sidebarToggle {
+        left: 9px;
+        top: 10px;
+        width: 38px;
+        height: 38px;
+    }
+
+    header h2 {
+        padding-left: 35px;
+    }
+}
+
 </style>
 <script src="https://www.youtube.com/iframe_api"></script>
 </head>
@@ -204,8 +547,27 @@ button{
 <body>
 
 <header>
+    <button id="sidebarToggle" onclick="toggleSidebar()">☰</button>
     <h2>🤖 PB AI — JARVIS</h2>
 </header>
+
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside id="jarvisSidebar">
+    <div id="sidebarTop">
+        <strong>🤖 JARVIS Menu</strong>
+        <button id="sidebarClose" onclick="closeSidebar()">×</button>
+    </div>
+
+    <button id="newChatButton" onclick="startNewChat()">
+        ＋ New Chat
+    </button>
+
+    <div id="historyHeading">Recent Chats</div>
+    <div id="historyList">
+        <div id="historyEmpty">Your recent chats will appear here.</div>
+    </div>
+</aside>
 
 <div id="chat">
 
@@ -276,6 +638,108 @@ const input = document.getElementById("input");
 const imageInput = document.getElementById("imageInput");
 const previewBox = document.getElementById("imagePreview");
 const previewImg = document.getElementById("previewImg");
+
+// JARVIS SIDEBAR AND SESSION HISTORY
+
+const jarvisSessions = [];
+
+function toggleSidebar() {
+    document.getElementById("jarvisSidebar").classList.toggle("open");
+    document.getElementById("sidebarOverlay").classList.toggle("open");
+}
+
+function closeSidebar() {
+    document.getElementById("jarvisSidebar").classList.remove("open");
+    document.getElementById("sidebarOverlay").classList.remove("open");
+}
+
+function getChatTitle() {
+    const firstUser = chat.querySelector(".message.user .bubble");
+    if (!firstUser) return "New Conversation";
+    return firstUser.innerText.trim().slice(0, 32) || "New Conversation";
+}
+
+function renderHistory() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+
+    if (jarvisSessions.length === 0) {
+        list.innerHTML = '<div id="historyEmpty">Your recent chats will appear here.</div>';
+        return;
+    }
+
+    jarvisSessions.forEach((session, index) => {
+        const button = document.createElement("button");
+        button.className = "historyItem";
+        button.textContent = "💬 " + session.title;
+        button.onclick = () => openHistory(index);
+        list.appendChild(button);
+    });
+}
+
+function archiveCurrentChat() {
+    if (!chat.querySelector(".message.user")) return;
+
+    jarvisSessions.unshift({
+        title: getChatTitle(),
+        html: chat.innerHTML
+    });
+
+    if (jarvisSessions.length > 10) {
+        jarvisSessions.pop();
+    }
+
+    renderHistory();
+}
+
+function startNewChat() {
+    archiveCurrentChat();
+
+    chat.innerHTML = `
+        <div class="message bot">
+            <div class="bubble">
+                🤖 Jarvis: Hello! Main Jarvis hoon. Aap kya poochna chahte hain?
+            </div>
+        </div>
+    `;
+
+    selectedImage = null;
+    previewImg.src = "";
+    previewBox.style.display = "none";
+    input.value = "";
+
+    closeSidebar();
+    input.focus();
+}
+
+function openHistory(index) {
+    const selected = jarvisSessions[index];
+    if (!selected) return;
+
+    if (chat.querySelector(".message.user")) {
+        jarvisSessions.unshift({
+            title: getChatTitle(),
+            html: chat.innerHTML
+        });
+
+        const selectedIndex = index + 1;
+        jarvisSessions.splice(selectedIndex, 1);
+    } else {
+        jarvisSessions.splice(index, 1);
+    }
+
+    chat.innerHTML = selected.html;
+
+    selectedImage = null;
+    previewImg.src = "";
+    previewBox.style.display = "none";
+    input.value = "";
+
+    renderHistory();
+    closeSidebar();
+    chat.scrollTop = chat.scrollHeight;
+}
+
 
 function toggleMenu(){
 
