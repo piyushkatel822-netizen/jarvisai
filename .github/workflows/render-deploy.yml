@@ -1,0 +1,23 @@
+name: Deploy JARVIS Backend to Render
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deployment
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK secret is missing"
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            --request POST "$RENDER_DEPLOY_HOOK"
+          echo "Render deployment request sent successfully."
