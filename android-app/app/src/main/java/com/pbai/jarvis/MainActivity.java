@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.*;
-import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -20,6 +19,15 @@ public class MainActivity extends Activity {
 
     private static final String HOME =
         "https://piyushkatel822-netizen.github.io/jarvisai/";
+
+    private static final String TRUSTED_HOST =
+        "piyushkatel822-netizen.github.io";
+
+    private boolean isTrustedOrigin(Uri uri) {
+        return uri != null
+            && "https".equalsIgnoreCase(uri.getScheme())
+            && TRUSTED_HOST.equalsIgnoreCase(uri.getHost());
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setSupportZoom(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         CookieManager.getInstance().setAcceptCookie(true);
 
@@ -44,8 +53,31 @@ public class MainActivity extends Activity {
                 WebView view, WebResourceRequest request
             ) {
                 Uri uri = request.getUrl();
-                return uri == null ||
-                    !"https".equalsIgnoreCase(uri.getScheme());
+
+                if (!request.isForMainFrame()) {
+                    return false;
+                }
+
+                if (isTrustedOrigin(uri)) {
+                    return false;
+                }
+
+                if (uri != null &&
+                    ("https".equalsIgnoreCase(uri.getScheme()) ||
+                     "http".equalsIgnoreCase(uri.getScheme()))) {
+                    try {
+                        startActivity(new Intent(
+                            Intent.ACTION_VIEW, uri
+                        ));
+                    } catch (Exception e) {
+                        Toast.makeText(
+                            MainActivity.this,
+                            "Cannot open external link",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+                return true;
             }
         });
 
@@ -53,14 +85,22 @@ public class MainActivity extends Activity {
             @Override
             public void onPermissionRequest(PermissionRequest request) {
                 runOnUiThread(() -> {
-                    boolean wantsAudio = false;
-                    for (String resource : request.getResources()) {
-                        if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
-                            wantsAudio = true;
+                    if (!isTrustedOrigin(request.getOrigin())) {
+                        request.deny();
+                        return;
+                    }
+
+                    String[] resources = request.getResources();
+                    boolean audioOnly = resources.length > 0;
+
+                    for (String resource : resources) {
+                        if (!PermissionRequest.RESOURCE_AUDIO_CAPTURE
+                                .equals(resource)) {
+                            audioOnly = false;
                         }
                     }
 
-                    if (!wantsAudio) {
+                    if (!audioOnly) {
                         request.deny();
                         return;
                     }
@@ -89,6 +129,7 @@ public class MainActivity extends Activity {
                 if (fileCallback != null) {
                     fileCallback.onReceiveValue(null);
                 }
+
                 fileCallback = callback;
 
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -159,5 +200,25 @@ public class MainActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (pendingPermission != null) {
+            pendingPermission.deny();
+            pendingPermission = null;
+        }
+
+        if (fileCallback != null) {
+            fileCallback.onReceiveValue(null);
+            fileCallback = null;
+        }
+
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+
+        super.onDestroy();
     }
 }
