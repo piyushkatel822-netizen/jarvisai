@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%" stop-color="#07152f"/>
+  <stop offset="100%" stop-color="#020817"/>
+ </linearGradient>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%" stop-color="#8af7ff"/>
+  <stop offset="100%" stop-color="#087cff"/>
+ </linearGradient>
+ <filter id="glow">
+  <feGaussianBlur stdDeviation="9" result="b"/>
+  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+ </filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<circle cx="256" cy="220" r="175" fill="none" stroke="#087cff" stroke-width="5" opacity=".35"/>
+<circle cx="256" cy="220" r="150" fill="none" stroke="#35dfff" stroke-width="3" opacity=".5"/>
+<g filter="url(#glow)">
+ <path d="M125 190 Q105 100 256 85 Q407 100 387 190" fill="none" stroke="url(#blue)" stroke-width="18" stroke-linecap="round"/>
+ <rect x="125" y="155" width="262" height="190" rx="78" fill="#102c55" stroke="url(#blue)" stroke-width="12"/>
+ <rect x="151" y="190" width="210" height="105" rx="48" fill="#06172f" stroke="#27dfff" stroke-width="5"/>
+ <ellipse cx="207" cy="242" rx="22" ry="29" fill="#59edff"/>
+ <ellipse cx="305" cy="242" rx="22" ry="29" fill="#59edff"/>
+ <path d="M220 320 Q256 340 292 320" fill="none" stroke="#39dfff" stroke-width="8" stroke-linecap="round"/>
+ <path d="M125 230 Q70 210 83 280 Q95 330 137 310" fill="none" stroke="#27bfff" stroke-width="15" stroke-linecap="round"/>
+ <path d="M387 230 Q442 210 429 280 Q417 330 375 310" fill="none" stroke="#27bfff" stroke-width="15" stroke-linecap="round"/>
+ <path d="M375 310 Q390 365 345 370" fill="none" stroke="#27bfff" stroke-width="9" stroke-linecap="round"/>
+ <circle cx="335" cy="370" r="13" fill="#8af7ff"/>
+</g>
+<text x="256" y="438" font-family="DejaVu Sans, sans-serif" font-size="43" font-weight="bold" text-anchor="middle" fill="#72eaff">JARVIS AI</text>
+</svg>
